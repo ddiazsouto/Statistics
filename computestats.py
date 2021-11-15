@@ -6,10 +6,18 @@ Created on Sat Aug 28 09:26:26 2021
 """
 import pandas as pd
 
-class stats:
 
+class Stats:
+    """
+        This is an ADT for various distributions (normal, binomial...) 
+        includes:
+        n choose x tools and ploting tools
+    """
     
-    def n_choose_x(n, x):
+    def factorial(number: int):
+    
+    def C(n, x):
+        """ Calculates n choose x """
         
         if n == 0 or x > n:  
             return 0
@@ -27,6 +35,12 @@ class stats:
             n_minus_x_factorial = n_minus_x_factorial*k
             
         return (n_factorial)//(x_factorial*n_minus_x_factorial)
+
+
+
+
+class stats(Stats):   
+
         
     
     def critical_v(probability_function: list, s_level=0.05):
@@ -47,7 +61,7 @@ class stats:
         
         for possibility in range(0, n+1):
             
-            ways_to_arrange = stats.n_choose_x(n, possibility)           
+            ways_to_arrange = stats.C(n, possibility)           
             p_this_outcome = p_each_outcome * ways_to_arrange
               
             p_x.append(round(p_this_outcome, 4))      
@@ -59,8 +73,36 @@ class stats:
         return p_x
     
     
+from random import randint
+            
+
+class CLT:
+    def __init__(self):
+        pass
     
-            
-            
-            
-   
+
+                
+
+def select_sample(n, fromdata):
+   section = []
+   for i in range(n):
+       section.append(fromdata[randint(0,len(fromdata)-1)])
+   return section
+
+
+    
+
+
+def many_samples(how_many, sample_size, fromdata):
+   out = []
+   for i in range(how_many):
+       new_sample = select_sample(sample_size, fromdata)
+       frame = pd.DataFrame(new_sample)
+       out.append(float(frame.mean()))
+   return out
+
+
+def plot(any_list):
+    frame = pd.DataFrame(any_list)
+    frame.plot(kind='hist')
+    
