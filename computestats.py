@@ -15,6 +15,8 @@ class Stats:
     """
     
     def factorial(number: int):
+        """ Calculates the factorial of a number """
+        
     
     def C(n, x):
         """ Calculates n choose x """
