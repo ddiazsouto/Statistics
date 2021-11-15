@@ -14,9 +14,15 @@ class Stats:
         n choose x tools and ploting tools
     """
     
-    def factorial(number: int):
+    def factorial(number_input: int, cut_short=1):
         """ Calculates the factorial of a number """
         
+        factorial = 1
+        
+        for i in range(number_input, cut_short, -1):
+            factorial = factorial * i        
+        return factorial
+    
     
     def C(n, x):
         """ Calculates n choose x """
@@ -25,19 +31,13 @@ class Stats:
             return 0
         elif  x == 0 or n == x:
             return 1
-        
-        n_minus_x_factorial = x_factorial = n_factorial = 1  
-        n_minus_x = n-x
-        
-        for i in range(1, n+1):
-            n_factorial = n_factorial*i            
-        for j in range(1, x+1):
-            x_factorial = x_factorial*j            
-        for k in range(1, n_minus_x+1):
-            n_minus_x_factorial = n_minus_x_factorial*k
-            
-        return (n_factorial)//(x_factorial*n_minus_x_factorial)
+        return (Stats.factorial(n)) // (Stats.factorial(x) * Stats.factorial(n-x))
 
+
+
+class DiscretePdistribution(Stats):
+    """ Abstract Data Type that will be reused to generate a p.m.f. """
+    pass
 
 
 
