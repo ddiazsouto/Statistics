@@ -31,7 +31,7 @@ class Stats:
             return 0
         elif  x == 0 or n == x:
             return 1
-        return (Stats.factorial(n)) // (Stats.factorial(x) * Stats.factorial(n-x))
+        return Stats.factorial(n, cut_short = (n-x) ) // Stats.factorial(x)
 
 
 
