@@ -43,6 +43,9 @@ class Discretedistribution(Stats):
         pmf = self.probability_distribution
         title_value = 'critical value =' + str(self.c_value())
         pd.DataFrame(pmf).plot(kind='bar',  figsize=(9,6), legend=False, title = title_value)
+        
+    def __str__(self):
+        return str(self.probability_distribution)
 
 
 
@@ -55,20 +58,24 @@ class Binomial(Discretedistribution):
         """ Initiates the class modelling X ~ B(n,p) """
         
         self.probability_distribution = self.p_function(n, p)
-        self.cumulative_distribution  = []
+        self.cumulative_distribution  = self.c_value(dist=True)
         self.s_level = 0.05
 
     
-    def c_value(self, s_level=0.05):
+    def c_value(self, s_level=0.05, dist = False):
         
         cumulative_probability = 0
         self.s_level = s_level
+        cmf = []
         
         for count, i in enumerate(self.probability_distribution): 
             cumulative_probability = cumulative_probability + i
             
-            if cumulative_probability*2 >= 0.05:
-                return count - 1
+            if cumulative_probability*2 >= 0.05 and dist == False:
+                return 1%(count - 1)
+            elif dist == True:
+                cmf.append(cumulative_probability)
+        return cmf
 
     
     def p_function(self, n: int, p: float):
@@ -87,6 +94,8 @@ class Binomial(Discretedistribution):
     def P(self, X):
         return self.probability_distribution[X]
     
+    def F(self, X):
+        return self.cumulative_distribution[X]
     
 from random import randint
             
