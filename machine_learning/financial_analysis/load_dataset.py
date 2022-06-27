@@ -26,6 +26,13 @@ if (response:= input("refresh from database?\nYes/No\n>> ") == 'Yes'):
     silver_df.to_csv("DATA/silver_dataset.csv", index=False, header=True)
 
 
-gold_df     = pd.read_csv("DATA/gold_dataset.csv")
-silver_df   = pd.read_csv("DATA/silver_dataset.csv")
-snp_dataset = pd.read_csv("DATA/s&p500_dataset.csv")
+"""  THIS PREPARES THE DATAFRAME WITH THE PARAMETERS WE NEED  """
+def get_assets_dataframe()
+    gold_df     = pd.read_csv("DATA/gold_dataset.csv")
+    silver_df   = pd.read_csv("DATA/silver_dataset.csv")
+    sandp_df    = pd.read_csv("DATA/s&p500_dataset.csv")
+    
+    merged_df = pd.merge( gold_df, sandp_df[['SP500', 'Date']], on='Date' )
+    all_merged_df = pd.merge( merged_df, silver_df, on='Date' )
+    
+    return merged_df
