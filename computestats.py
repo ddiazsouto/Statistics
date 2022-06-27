@@ -37,6 +37,24 @@ class Stats:
             return 1
         return scipy.special.comb(n, x)
         # return Stats.factorial(n, cut_short = (n-x) ) // Stats.factorial(x)
+        
+    def normal_plot(data):
+        sorted(data)
+        n = len(data) + 1
+        index = []
+        x_i = []
+        deciles = []
+        y_i = []
+        for i, data_point in enumerate(data):
+            index.append(i+1)
+            x_i.append(data_point)
+            decile = (i+1)/n
+            deciles.append(decile)
+            y_i.append(StandardNormal.quant(None, decile))
+        df = pd.DataFrame( {'data': x_i, 'decile': deciles, 'y_i': y_i}, index = index)
+        plot_df = pd.DataFrame( {'data': x_i, 'y_i': y_i}, index = index)
+        
+        plot_df.plot()
 
 
 
@@ -218,13 +236,13 @@ from math import sqrt
 
 class StandardNormal:
 
-    def F(self, Z):
+    def F(Z):
         out = norm.cdf(Z)
         
         #norm.ppf(0.975)
         return out
     
-    def quant(self, q):
+    def quant(q):
         out = norm.ppf(q)
         return out
     
