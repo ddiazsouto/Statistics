@@ -27,7 +27,7 @@ if (response:= input("refresh from database?\nYes/No\n>> ") == 'Yes'):
 
 
 """  THIS PREPARES THE DATAFRAME WITH THE PARAMETERS WE NEED  """
-def get_assets_dataframe()
+def get_assets_dataframe():
     gold_df     = pd.read_csv("DATA/gold_dataset.csv")
     silver_df   = pd.read_csv("DATA/silver_dataset.csv")
     sandp_df    = pd.read_csv("DATA/s&p500_dataset.csv")
