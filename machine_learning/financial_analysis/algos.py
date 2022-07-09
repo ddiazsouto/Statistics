@@ -51,6 +51,11 @@ class J_function():
         print(market_results)
         # We calculate the squared difference to a 1000% of each individual
         # dimension or asset class and store it in a vector
+        
+        # TODO: Wel, well... This is J, the loss and is what we need to
+        #       differenciate, and we need to differenciate its rate of 
+        #       change in each direction. So while _pn is a valid function,
+        #       this is what we need to minimize and differenciate.
         vector = []
         for dimension in range(number_of_dimensions):
             
