@@ -17,9 +17,10 @@ def percentage_change(first_value: float, second_value: float) -> float:
 
 """  HERE we define the function or pn(r) used for the loss function J(pn) """
 
-class J():
+
+class J_function():
     """
-        theta is a strange thing, it is a Function Data Type
+        This is a strange thing, it is a Function Data Type
         
         It is for sure an abstract structure.
         
@@ -62,28 +63,6 @@ class J():
         
         dJ = dy_dx(self._pn)
         
-        
-        
-    
-        
-        
-    def partial_derivatives(self, r_caret, du=0.1):
-        """ finds the partial derivatives of a multidimensional vector
-            
-            returns a vector with the derivative of an increase in each
-            dimension """
-        
-        # Maybe of use
-        number_of_dimensions = len(r_caret)
-        normalize_to_one = 0.1 / (number_of_dimensions - 1)
-        
-        partial_derivatives_vector = []
-        
-        for dimension in range (number_of_dimensions):
-            pass
-        
-        
-        
     
     def _pn(self, r_caret: np.array) -> np.array:
         """ This function takes r_caret which is a vector with the 
@@ -99,7 +78,6 @@ class J():
                 There is a pd.DataFrame which contains the prices of asset classes
                 over a period of time merged on date """
         
-        allocation = 100 * r_caret # £ or $ or € or anything
         delay = 22   # 22 months ahead (factored in some months of no data)
         
         
@@ -114,6 +92,9 @@ class J():
         
         vector_returns = market_growth * r_caret
         
+        # TODO: the output would be better if it was a dot product it
+        #       would require, however to change the derivative function
+        #       (see line 144, 147)
         return vector_returns
     
     
@@ -149,21 +130,22 @@ class dy_dx:
         self.points = []
         self.function = function
         
-    def d(self, x: {float,np.ndarray,list}, verbose=False) ->float:
+    def d(self, x: {float,np.ndarray,list}, verbose=False, dx=1e-4) -> float:
         
-        dx = 1e-4
         f_x = self.function(x)
         dimensions = len(x)
         
         if type(x) == float:
             f_x_dx = self.function(x + dx)
             gradient = ( f_x_dx - f_x ) /dx
+        # TODO: improve the gradient descent by calculating the partial
+        #       derivatives using the rate of change betweek the TOTAL loss
+        #       of J against rate of change of dx in each dimension
         else:
             f_x_dx = self.function([x + dx for x in x])
             gradient = np.array( [f_x_dx[j] - f_x[j] 
                                   for j in range(dimensions)])
-            print(gradient)
-            gradient = gradient / dx
+        gradient = gradient / dx
 
         # We store the points computed to be able to plot them later
         point = (x, f_x)
