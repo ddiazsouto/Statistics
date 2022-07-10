@@ -39,16 +39,18 @@ class J_function():
         self.purchase_time = purchase_time
         self.n_dimensions = int
         
+    def purchase_time(time: int) -> None:
+        self.purchase_time = time
+        
     
-    def of(self, r_caret):
+    def _loss_function(self, r_caret):
         """ Executes J function, which we want to minimize """
         
         number_of_dimensions = len(r_caret)
         normalizing_constant = 1/ (2 * number_of_dimensions)
-        
-        market_results = self._pn(r_caret)
-        
-        print(market_results)
+
+        market_results = self._pn(r_caret)       
+
         # We calculate the squared difference to a 1000% of each individual
         # dimension or asset class and store it in a vector
         
@@ -56,20 +58,42 @@ class J_function():
         #       differenciate, and we need to differenciate its rate of 
         #       change in each direction. So while _pn is a valid function,
         #       this is what we need to minimize and differenciate.
-        vector = []
-        for dimension in range(number_of_dimensions):
+        total_loss = 0
+        for case_result in market_results:
             
-            loss = ( 1000 - market_results[dimension] )**2
-            vector.append(loss)
+            loss = 1000 - case_result
+            total_loss += loss
             
-        print(vector)
-       
-        # We need to find the derivatives here
+        return total_loss*normalizing_constant
+
         
-        dJ = dy_dx(self._pn)
+    def gradient_function(self, r_caret, dx = 1e-3):
+        """ Returns the partial derivatives"""
         
-    
-    def _pn(self, r_caret: np.array) -> np.array:
+        J = self._loss_function
+        m_dimensions = r_caret.shape[0]
+        
+        r_caret = r_caret - (dx/m_dimensions)  # Not essential but curious to see it effect
+        
+        f_x = J(r_caret) # f_x, a float number
+        
+        partial_diff_vector = np.zeros(m_dimensions)
+        
+        # Now we need a vector of floating numbers each of which need substracting of f_x
+        
+        for i in range(m_dimensions):
+            
+            dr_di   = r_caret
+            dr_di[i] += dx
+            
+            dJ_di = J(dr_di) - f_x
+            
+            partial_diff_vector[i] = dJ_di/dx
+            
+        return partial_diff_vector
+
+
+    def _pn(self, r_caret: np.array, v=False) -> np.array:
         """ This function takes r_caret which is a vector with the 
             ratios for each asset class and calculates another vector 
             which contains the change in the portfolio in 3 years
@@ -92,15 +116,17 @@ class J_function():
         sell = self._portfolio( self.purchase_time + delay, self.market_data_df)
         
         market_growth = percentage_change(buy, sell)        
-        # Next line probably unnecessary
-        portfolio_growth_percent = market_growth.dot(r_caret)
+        portfolio_total_growth = market_growth.dot(r_caret)
         
-        vector_returns = market_growth * r_caret
+        # Next line may come handy as it maintains the growth of each asset class
+        if v:
+            vector_returns = market_growth * r_caret
+            print(vector_returns)
         
         # TODO: the output would be better if it was a dot product it
         #       would require, however to change the derivative function
         #       (see line 144, 147)
-        return vector_returns
+        return np.array([portfolio_total_growth])
     
     
     def get_theta(self, theta):
@@ -117,69 +143,28 @@ class J_function():
         clean_row_array = np.array(find_row_and_to_list)
         return clean_row_array
     
-    
-    
-    
-"""  TO BE IMPORTED   """
 
 
-class dy_dx:
-    """
-        dy/dx = f(x + Delta(x)) - f(x) 
-                ---------------------
-                     Delta(x)
-    """
+def gradient_descent(df: pd.DataFrame, buy_time: int = 156, iters=20):
+    """ Execuuted the gradient descent algorithm """
     
-    def __init__(self, function):
-        # We store the result of computations so we can plot the results obtained
-        self.points = []
-        self.function = function
-        
-    def d(self, x: {float,np.ndarray,list}, verbose=False, dx=1e-4) -> float:
-        
-        f_x = self.function(x)
-        dimensions = len(x)
-        
-        if type(x) == float:
-            f_x_dx = self.function(x + dx)
-            gradient = ( f_x_dx - f_x ) /dx
-        # TODO: improve the gradient descent by calculating the partial
-        #       derivatives using the rate of change betweek the TOTAL loss
-        #       of J against rate of change of dx in each dimension
-        else:
-            f_x_dx = self.function([x + dx for x in x])
-            gradient = np.array( [f_x_dx[j] - f_x[j] 
-                                  for j in range(dimensions)])
-        gradient = gradient / dx
+    GD_cluster = J_function(df, purchase_time = buy_time)
 
-        # We store the points computed to be able to plot them later
-        point = (x, f_x)
-        self.points.append( point )        
-        if verbose:
-            print("Here is x", x)
-            print("Here f(x) is", f_x)        
-            print("Now f(x+dx) is", f_x_dx)
-            print('result of [f(x+dx) - f(x)] is', gradient)        
-        return gradient
-
+    alpha = 1e-2
+    r = np.array([0.5, 0.5])
     
-    def plot(self):
-
-        frame = pd.DataFrame(self.points, columns = ['X', 'Y'])
-        #frame = frame.set_index('x')
-        frame.plot()
+    for i in range(iters):
+        print('When r:', r)
+        dJ_dx = GD_cluster.gradient_function(r)
+        print('The partial derivatives', dJ_dx)
+        change = alpha*dJ_dx
+        print('Direct the vector:', change)
+        r = r - change
+        print('Resulting in r:', r,'\n')
         
-        """   FROM coursera
+    print('\n\nAfter', iters, 'iterations, we end up with r:', r)
+    total = sum(r)
+    print('resuting in allocation', r/total)
         
-        # Plot the data points
-        plt.scatter(x_train, y_train, marker='x', c='r')
-        # Set the title
-        plt.title("Housing Prices")
-        # Set the y-axis label
-        plt.ylabel('Price (in 1000s of dollars)')
-        # Set the x-axis label
-        plt.xlabel('Size (1000 sqft)')
-        plt.show()
         
-        """
         
