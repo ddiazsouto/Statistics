@@ -1,6 +1,9 @@
 import pymysql
 import pandas as pd
 
+from configparser import Interpolation
+from functools import reduce
+
 """  THIS FILE IS DATABASE SPECIFIC (MySQL) """
 
 if (response:= input("refresh from database?\nYes/No\n>> ") == 'Yes'):
@@ -26,13 +29,26 @@ if (response:= input("refresh from database?\nYes/No\n>> ") == 'Yes'):
     silver_df.to_csv("DATA/silver_dataset.csv", index=False, header=True)
 
 
-"""  THIS PREPARES THE DATAFRAME WITH THE PARAMETERS WE NEED  """
-def get_assets_dataframe():
-    gold_df     = pd.read_csv("DATA/gold_dataset.csv")
-    silver_df   = pd.read_csv("DATA/silver_dataset.csv")
-    sandp_df    = pd.read_csv("DATA/s&p500_dataset.csv")
+def get_assets_dataframe() -> pd.DataFraFrame:
+    """  THIS PREPARES THE DATAFRAME WITH THE PARAMETERS WE NEED  """
+
+    #import CSVs
+    gold_df             = pd.read_csv("DATA/gold_dataset.csv")
+    silver_df           = pd.read_csv("DATA/silver_dataset.csv")
+    sandp_df            = pd.read_csv("DATA/s&p500_dataset.csv")
+    usaRealEstate_df    = pd.read_csv("DATA/historical-median-home-value_dateset.csv")
+    oil_df              = pd.read_csv("DATA/oil_dataset.csv")
+    bonds10_df          = pd.read_csv("DATA/bonds-10Y_dataset.csv")
+
+    #Creates array with all the DataFrames
+    allDFs              = [gold_df,
+                          silver_df,
+                          sandp_df[['SP500', 'Date']],
+                          usaRealEstate_df[['Median Home Price (NSA)', 'Date']],
+                          oil_df[['Oil', 'Date']],
+                          bonds10_df]
+
+    all_merged_df = reduce(lambda  left,right: pd.merge(left,right,on=['Date'], how='outer'), allDFs)
+    interpolated_merged_df = all_merged_df.interpolate(method ='linear', limit_direction ='forward')
     
-    merged_df = pd.merge( gold_df, sandp_df[['SP500', 'Date']], on='Date' )
-    all_merged_df = pd.merge( merged_df, silver_df, on='Date' )
-    
-    return merged_df
+    return interpolated_merged_df
