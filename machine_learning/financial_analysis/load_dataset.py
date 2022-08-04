@@ -38,8 +38,6 @@ def get_assets_dataframe() -> pd.DataFrame:
     usaRealEstate_df    = pd.read_csv("financial_analysis/DATA/historical-median-home-value_dateset.csv")
     oil_df              = pd.read_csv("financial_analysis/DATA/oil_dataset.csv")
     bonds10_df          = pd.read_csv("financial_analysis/DATA/bonds-10Y_dataset.csv")
-    #inflation_df        = pd.read_csv("financial_analysis/DATA/inflation-percentils_dataset.csv")
-    #growth_df           = pd.read_csv("financial_analysis/DATA/growth-percentils_dataset.csv")
     
     #Creates array with all the assets DataFrames
     allDFs              = [gold_df,
@@ -47,19 +45,11 @@ def get_assets_dataframe() -> pd.DataFrame:
                           sandp_df[['SP500', 'Date']],
                           usaRealEstate_df[['Median Home Price (NSA)', 'Date']],
                           oil_df[['Oil', 'Date']],
-                          bonds10_df]#,
-                          #inflation_df,
-                          #growth_df]
+                          bonds10_df]
     
     #1) Creates a DataFrame, 2)Sorted by Date, 3)Eliminates NaN by linear interpolation
     all_merged_df = reduce(lambda  left,right: pd.merge(left,right,on=['Date'], how='outer'), allDFs)
     all_merged_df.sort_values(by="Date", inplace=True)
-
-    #all_merged_df["Date"] = pd.to_datetime(all_merged_df["Date"])
-    #all_merged_df.index = pd.DatetimeIndex(all_merged_df.index)
-    #idx = pd.date_range('1871-01-01', '2022-07-15')
-    #all_merged_df = all_merged_df.reindex(idx, fill_value=np.NaN)
-    #all_merged_df["Date"] = all_merged_df["Date"].astype(str)
 
     interpolated_merged_df = all_merged_df.interpolate(method='linear', limit_direction ='forward')
     
@@ -68,12 +58,24 @@ def get_assets_dataframe() -> pd.DataFrame:
 def get_Indicators_DataFrame() -> pd.DataFrame:
 
     #import Indicartors CSV
-    national_income_df             = pd.read_csv("financial_analysis/DATA/adjusted-net-national-income.csv")
-    money_growth_df                = pd.read_csv("financial_analysis/DATA/broad-money-growth.csv")
+    #5 more indicators pending to add
+    inflation_df                = pd.read_csv("financial_analysis/DATA/inflation-percentils_dataset.csv")
+    growth_df                   = pd.read_csv("financial_analysis/DATA/growth-percentils_dataset.csv")
+    national_income_df          = pd.read_csv("financial_analysis/DATA/adjusted-net-national-income.csv")
+    money_growth_df             = pd.read_csv("financial_analysis/DATA/broad-money-growth.csv")
+    us_debt_df                  = pd.read_csv("financial_analysis/DATA/united-states-gdp_debt.csv")
+
+    us_debt_df[['US Debt as GDP percentage']] = us_debt_df[['US Debt as GDP percentage']].pct_change()
+    us_debt_df.rename(columns={'US Debt as GDP percentage': 'US Debt as GDP percentage annual percentual change'}, inplace=True)
+    
 
     #Creates array with all the indicators DataFrames
-    indicatorsDFs              = [national_income_df,
-                                  money_growth_df]
+    indicatorsDFs              = [inflation_df,
+                                  growth_df,
+                                  national_income_df,
+                                  money_growth_df,
+                                  us_debt_df[['Date','US Debt as GDP percentage annual percentual change','US GDP annual Growth']]]#,
+                                  #usa_Debt_as_GDP_percentage_annual_Variance]
 
     #1) Creates a DataFrame, 2)Sorted by Date, 3)Eliminates NaN by linear interpolation
     indicators_merged_df = reduce(lambda  left,right: pd.merge(left,right,on=['Date'], how='outer'), indicatorsDFs)
